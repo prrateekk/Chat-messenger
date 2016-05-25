@@ -83,8 +83,12 @@ Chat
 			$messageBox.val('');
 		});
 
+		socket.on('private message',function(data){
+			$chat.append('<b>'+data.nick+'</b>: '+data.msg+'<br>');
+		});
+		
 		socket.on('new message',function(data){
-			$chat.append('<b>'+data.nick+'</b> : '+data.msg+'<br>');
+			$chat.append('<b>'+data.nick+'</b>: '+data.msg+'<br>');
 		});
 	});
 </script>
