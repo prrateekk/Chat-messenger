@@ -4,7 +4,18 @@
 Chat
 </title>
 
+<link rel="stylesheet" href="http://cdn.jsdelivr.net/highlight.js/9.4.0/styles/default.min.css">
+<script src="http://cdn.jsdelivr.net/highlight.js/9.4.0/highlight.min.js"></script>
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
 <style>
+	#nickWrap{
+		position: absolute;
+		left: 35%;
+		top: 30%;
+	}
 	#chat{
 		height:500px;
 	}
@@ -12,8 +23,17 @@ Chat
 		display: none;
 	}
 	#chatWrap{
+		width: 500px;
+		height: 500px;
 		float: left;
 		border: 1px black solid;
+		overflow-y: scroll;
+	}
+	#nickname{
+		height:27px;
+	}
+	#message{
+		height:27px;
 	}
 </style>
 
@@ -33,17 +53,17 @@ Chat
 <div id="contentWrap">
 	<div id="chatWrap">
 		<div id="chat"></div>
+	</div>
+
 		<form id="send">
 			<input size="50" id="message"></input>
 			<input type="submit"></input>
 		</form>
-	</div>
+		<textarea rows="4" cols="50" id="codespace" form="send"></textarea>
+
 	<div id="users"></div>
 </div>
 
-
-<script src="http://code.jquery.com/jquery-latest.min.js"></script>
-<script src="/socket.io/socket.io.js"></script>
 
 <script>
 	jQuery(function($){
@@ -54,6 +74,7 @@ Chat
 		var $nickForm = $('#setNick');
 		var $nickError = $('#nickError');
 		var $nickBox = $('#nickname');
+		var $code = $('#codespace');
 
 		$nickForm.submit(function(e){
 			e.preventDefault();
@@ -79,16 +100,47 @@ Chat
 
 		$messageForm.submit(function(e){
 			e.preventDefault();
-			socket.emit('send-message',$messageBox.val());
+			var msg = $messageBox.val();
+			msg = msg.trim();
+			if (msg.substr(0,2)==='//'){
+				socket.emit('send-private-message',msg);
+				if ($code.val()!=''){
+					var ind = msg.indexOf(' ');
+					var name;
+					if (ind!=-1) name = msg.substr(0,ind);
+					else name = msg.substr(0);
+					var temp = name+' '+$code.val();
+					//console.log(temp);
+					socket.emit('send-private-code',temp);
+				}
+			}
+			else{
+				socket.emit('send-public-message',msg);
+				msg = $code.val();
+				socket.emit('send-public-code',msg);
+				
+			}
 			$messageBox.val('');
+			$code.val('');
 		});
 
-		socket.on('private message',function(data){
-			$chat.append('<b>'+data.nick+'</b>: '+data.msg+'<br>');
-		});
+		function parseCode(){
+			var code = document.getElementsByTagName('pre');
+			var l = code.length;
+			for (var i=0; i < l; i++) {
+				hljs.highlightBlock(code[i]);
+			}
+		}
 		
+		socket.on('code message',function(data){
+			$chat.append('<b>'+data.nick+'</b>: '+'<pre>' +data.msg+'<br></pre>');
+			parseCode();
+			chatWrap.scrollTop = chatWrap.scrollHeight;
+		});
+
 		socket.on('new message',function(data){
 			$chat.append('<b>'+data.nick+'</b>: '+data.msg+'<br>');
+			chatWrap.scrollTop = chatWrap.scrollHeight;
 		});
 	});
 </script>
