@@ -124,17 +124,31 @@ Chat
 			$code.val('');
 		});
 
-		function parseCode(){
+		function highlightCode(){
 			var code = document.getElementsByTagName('pre');
 			var l = code.length;
 			for (var i=0; i < l; i++) {
 				hljs.highlightBlock(code[i]);
 			}
 		}
+
+		function parseCode(s){
+			var pc = "";
+			var l = s.length;
+			for (var i=0;i<l;i++){
+				if (s[i]=='<') pc+="&lt;";
+				else if (s[i]=='>') pc+="&gt;";
+				else pc+=s[i];
+			}
+			return pc;
+		}
 		
 		socket.on('code message',function(data){
-			$chat.append('<b>'+data.nick+'</b>: '+'<pre>' +data.msg+'<br></pre>');
-			parseCode();
+			//console.log(data.msg);
+			var parsedCode = parseCode(data.msg);
+			//console.log(parsedCode);
+			$chat.append('<b>'+data.nick+'</b>: '+'<pre>' +parsedCode+'<br></pre>');
+			highlightCode();
 			chatWrap.scrollTop = chatWrap.scrollHeight;
 		});
 

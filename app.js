@@ -30,52 +30,6 @@ io.sockets.on('connection',function(socket){
 		io.sockets.emit('usernames',Object.keys(users)) ;
 	}
 
-	/*
-	socket.on('send-message',function(data){
-		var msg = data.trim();
-		if (msg.substr(0,2)==='//'){
-			msg = msg.substr(2);
-			var ind = msg.indexOf(' ');
-			if (ind!=-1){
-				var name = msg.substr(0,ind);
-				msg = msg.substr(ind+1);
-				//console.log(msg);
-				if (name in users && name!=socket.nickname){
-					console.log('Private Message.');
-					users[name].emit('private message',{msg:msg,nick:socket.nickname});
-					socket.emit('private message',{msg:msg,nick:socket.nickname});
-				}
-				else console.log('Error!');
-			}
-			else console.log('Error!');
-		}
-		else if (msg.substr(0,2)==='<<'){
-			msg = msg.substr(2);
-			var ind = msg.indexOf(' ');
-			if (ind!=-1){
-				var name = msg.substr(0,ind);
-				msg = msg.substr(ind+1);
-				//console.log(msg);
-				if (name in users && name!=socket.nickname){
-					console.log('Code snippet Message.');
-					users[name].emit('code message',{msg:msg,nick:socket.nickname});
-					socket.emit('code message',{msg:msg,nick:socket.nickname});
-				}
-				else console.log('Error!');
-			}
-			else console.log('Error!');
-		}
-		else if (msg.substr(0,2)==='**'){
-			msg = msg.substr(2);
-			io.sockets.emit('public code message',{msg:msg,nick:socket.nickname});
-		}
-
-		else{
-			io.sockets.emit('new message',{msg:data,nick:socket.nickname});
-		}
-	});
-	*/
-
 	socket.on('send-public-message',function(data){
 		var msg = data.trim();
 		if (msg!='') io.sockets.emit('new message',{msg:data,nick:socket.nickname});
